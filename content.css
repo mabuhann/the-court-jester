@@ -1,0 +1,99 @@
+#court-jester-root,
+#court-jester-banner,
+#court-jester-bubble {
+  pointer-events: none;
+  user-select: none;
+}
+
+#court-jester-root {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2147483647;
+  transform: translate3d(0px, 0px, 0px);
+  will-change: transform;
+}
+
+#court-jester {
+  position: absolute;
+  left: 0;
+  top: 0;
+  image-rendering: pixelated;
+  background-repeat: no-repeat;
+  background-position: 0px 0px;
+  background-size: auto 100%;
+  will-change: background-image, width, height, transform;
+}
+
+#court-jester-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translate(-50%, -12px);
+  opacity: 0;
+  padding: 8px 10px;
+  border: 2px solid #3a2218;
+  border-radius: 14px;
+  background: #fff4d8;
+  color: #2b160f;
+  font: 700 13px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+#court-jester-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #3a2218;
+}
+
+#court-jester-bubble::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 7px solid #fff4d8;
+  z-index: 1;
+}
+
+#court-jester-bubble.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -18px);
+}
+
+#court-jester-banner {
+  position: fixed;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%) translateY(-10px);
+  opacity: 0;
+  z-index: 2147483647;
+  padding: 12px 20px;
+  border: 2px solid #4a2816;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff4d8 0%, #f3dfb2 100%);
+  color: #4a2816;
+  font: 800 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  transition: opacity 200ms ease, transform 200ms ease;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+#court-jester-banner.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0px);
+}

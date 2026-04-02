@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Court Jester</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup">
+
+    <header class="header">
+      <img src="assets/jester_logo.png" class="logo" alt="The Court Jester">
+      <div class="header-text">
+        <h1 class="title">The Court Jester</h1>
+        <p class="subtitle">Mischief as a Service</p>
+      </div>
+    </header>
+
+    <div class="status-row">
+      <span class="status-label" id="status-label">Dormant</span>
+      <button class="toggle" id="toggle" aria-pressed="false" title="Unleash / banish the jester">
+        <span class="toggle-track">
+          <span class="toggle-thumb"></span>
+        </span>
+      </button>
+    </div>
+
+    <button class="worse-btn" id="worse-btn" disabled>
+      Make it Worse
+    </button>
+
+    <div class="divider"></div>
+
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-num" id="stat-paused">0</span>
+        <span class="stat-name">Videos<br>Paused</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num" id="stat-proclamations">0</span>
+        <span class="stat-name">Proclam&shy;ations</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num" id="stat-behaviors">0</span>
+        <span class="stat-name">Chaotic<br>Acts</span>
+      </div>
+    </div>
+
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
