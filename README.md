@@ -49,33 +49,6 @@ After changing files:
 3. Click `Reload` on the extension
 4. Refresh the tab you are testing on
 
-## Package As A Zip
-
-Chrome Web Store uploads require a zip of the extension contents.
-
-From PowerShell inside this folder:
-
-```powershell
-Compress-Archive -Path assets,background.js,content.css,content.js,manifest.json,popup.css,popup.html,popup.js,README.md -DestinationPath the-court-jester.zip -Force
-```
-
-That creates `the-court-jester.zip` in the project folder.
-
-## Upload To GitHub
-
-From PowerShell inside this folder:
-
-```powershell
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/the-court-jester.git
-git push -u origin main
-```
-
-If you create the GitHub repo in the browser first, make it empty with no README, no `.gitignore`, and no license to avoid conflicts.
-
 ## Notes
 
 - The extension runs on normal web pages only, not `chrome://` pages
