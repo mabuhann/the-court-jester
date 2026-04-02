@@ -20,7 +20,7 @@ A Chrome extension that drops an animated jester into web pages to cause mild ch
 2. Turn on `Developer mode`
 3. Click `Load unpacked`
 4. Select this folder:
-   `D:\vibecoding\the-court-jester`
+   `/the-court-jester`
 
 ## How To Use
 
