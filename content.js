@@ -15,7 +15,7 @@
   ═══════════════════════════════════════════════════════════════════════ */
   const SPRITES = {
     idle:  { src: "assets/jester_idle_normalized.png",     frames: 3, fps: 5,  scale: 0.88 * 0.55 },
-    run:   { src: "assets/jester_running_normalized.png",  frames: 3, fps: 10, scale: (544 / 389) * 0.55 },
+    run:   { src: "assets/jester_running_normalized.png",  frames: 3, fps: 10, scale: 1 * 0.55 },
     clap:  { src: "assets/jester_clapping_normalized.png", frames: 3, fps: 8,  scale: 1 * 0.55 },
     dance: { src: "assets/jester_dancing_normalized.png",  frames: 4, fps: 8,  scale: 1 * 0.55 }
   };
@@ -39,6 +39,10 @@
     "Focus is the enemy of fun.",
     "Thou hast been warned. Repeatedly.",
     "The deadline is merely a suggestion.",
+    "I have misplaced thy momentum.",
+    "The workflow was too tidy. I fixed it.",
+    "Behold: a perfectly timed nuisance.",
+    "A small inconvenience, delivered theatrically.",
   ];
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -87,6 +91,20 @@
   function vw() { return window.innerWidth; }
   function vh() { return window.innerHeight; }
   function delay(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+  function shakePage(duration = 520, intensity = 10) {
+    document.documentElement.animate([
+      { transform: "translate3d(0px, 0px, 0px) rotate(0deg)" },
+      { transform: `translate3d(${intensity}px, -${Math.round(intensity * 0.45)}px, 0) rotate(-0.5deg)` },
+      { transform: `translate3d(-${Math.round(intensity * 0.8)}px, ${Math.round(intensity * 0.6)}px, 0) rotate(0.5deg)` },
+      { transform: `translate3d(${Math.round(intensity * 0.55)}px, ${Math.round(intensity * 0.3)}px, 0) rotate(-0.35deg)` },
+      { transform: "translate3d(0px, 0px, 0px) rotate(0deg)" },
+    ], {
+      duration,
+      easing: "ease-out",
+      iterations: 1,
+    });
+  }
 
   /* ═══════════════════════════════════════════════════════════════════════
      DOM MANAGEMENT
@@ -385,6 +403,11 @@
     );
   }
 
+  function causeMomentaryChaos(label = "Chaos in the court.") {
+    showRoyalBanner(label, 1600);
+    shakePage(state.worseMode ? 760 : 480, state.worseMode ? 14 : 8);
+  }
+
   /* ═══════════════════════════════════════════════════════════════════════
      BEHAVIOR SYSTEM
      beginBehavior() / endBehavior() enforce the isPerforming lock.
@@ -479,6 +502,7 @@
 
     await applyJesterState("clap");
     if (!state.root) { endBehavior(); return; }
+    if (state.worseMode) causeMomentaryChaos("Applause. Disorder. Splendor.");
     showJesterMessage(pick([
       "Bravo! Bravo!",
       "A magnificent nothing!",
@@ -520,6 +544,7 @@
 
     await applyJesterState("dance");
     if (!state.root) { endBehavior(); return; }
+    causeMomentaryChaos("LOOK AT HIM.");
     showJesterMessage(pick([
       "LOOK AT ME.",
       "Thy focus hath been stolen.",
@@ -552,6 +577,7 @@
     state.stats.videosPaused++;
     saveStats();
 
+    causeMomentaryChaos("Intermission by royal decree.");
     showJesterMessage(pick([
       "Intermission, my liege.",
       "The performance lacks flair.",
@@ -563,10 +589,10 @@
 
   function startVideoWatcher() {
     stopVideoWatcher();
-    const interval = state.worseMode ? 9000 : 20000;
+    const interval = state.worseMode ? 6500 : 20000;
     state.videoCheckInterval = setInterval(() => {
       if (!state.enabled) return;
-      if (Math.random() < (state.worseMode ? 0.55 : 0.28)) {
+      if (Math.random() < (state.worseMode ? 0.72 : 0.28)) {
         tryPauseVideo();
       }
     }, interval);
@@ -604,7 +630,7 @@
     if (!state.enabled) return;
     clearTimeout(state.behaviorTimeout);
 
-    const base   = state.worseMode ? randInt(3500, 8500) : randInt(9000, 19000);
+    const base   = state.worseMode ? randInt(2500, 6500) : randInt(9000, 19000);
     const jitter = rand(-1200, 1200);
     const d      = Math.max(1000, base + jitter);
 
