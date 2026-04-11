@@ -9,10 +9,12 @@ A Chrome extension that drops an animated jester into web pages to cause mild ch
 ## Demo
 
 <p align="center">
-  <video src="./Court Jester Demo.mp4" controls width="960">
-    Your browser does not support embedded video.
-    <a href="./Court Jester Demo.mp4">Download the demo video</a>.
-  </video>
+  <a href="./Court Jester Demo.mp4">
+    <img src="assets/jester_logo.png" alt="Click to play the Court Jester demo video" width="320">
+  </a>
+</p>
+<p align="center">
+  Click the image to play the demo
 </p>
 
 ## Features
