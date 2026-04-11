@@ -15,9 +15,6 @@ A Chrome extension that drops an animated jester into web pages to cause mild ch
   </video>
 </p>
 
-- Watch the recorded demo: [`Court Jester Demo.mp4`](<./Court Jester Demo.mp4>)
-- Try the interactive local preview: [`demo.html`](./demo.html)
-
 ## Features
 
 - Animated idle, run, clap, and dance states
