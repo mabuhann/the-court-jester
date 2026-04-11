@@ -52,6 +52,7 @@
     // DOM refs
     root: null,
     jester: null,
+    veil: null,
     bubble: null,
     banner: null,
     // Sprite engine
@@ -119,12 +120,16 @@
     jester.id = "court-jester";
     jester.dataset.state = "idle";
 
+    const veil = document.createElement("div");
+    veil.id = "court-jester-veil";
+
     const bubble = document.createElement("div");
     bubble.id = "court-jester-bubble";
 
     const banner = document.createElement("div");
     banner.id = "court-jester-banner";
 
+    document.documentElement.appendChild(veil);
     root.appendChild(jester);
     root.appendChild(bubble);
     document.documentElement.appendChild(root);
@@ -132,6 +137,7 @@
 
     state.root = root;
     state.jester = jester;
+    state.veil = veil;
     state.bubble = bubble;
     state.banner = banner;
 
@@ -403,8 +409,19 @@
     );
   }
 
+  function showChaosVeil(duration = 520) {
+    if (!state.veil) return;
+    state.veil.classList.add("is-visible");
+    clearTimeout(state.veil._hideTimer);
+    state.veil._hideTimer = setTimeout(
+      () => state.veil?.classList.remove("is-visible"),
+      duration
+    );
+  }
+
   function causeMomentaryChaos(label = "Chaos in the court.") {
     showRoyalBanner(label, 1600);
+    showChaosVeil(state.worseMode ? 820 : 520);
     shakePage(state.worseMode ? 760 : 480, state.worseMode ? 14 : 8);
   }
 
@@ -564,6 +581,40 @@
     endBehavior();
   }
 
+  async function royalTantrum() {
+    if (!beginBehavior()) return;
+
+    const jW = state.jesterWidth || 80;
+    const jH = state.jesterHeight || 100;
+    const cx = Math.max(20, (vw() - jW) / 2);
+    const cy = Math.max(24, (vh() - jH) / 2 - 10);
+
+    await applyJesterState("run");
+    if (!state.root) { endBehavior(); return; }
+    setFacing(cx > state.x);
+    await animateTo(cx, cy, 280);
+
+    await applyJesterState("dance");
+    if (!state.root) { endBehavior(); return; }
+    causeMomentaryChaos("A royal tantrum is underway.");
+    showJesterMessage("I reject thy peace and quiet.", 1800);
+    await delay(700);
+    causeMomentaryChaos("Order has been postponed.");
+    await delay(800);
+    tryPauseVideo();
+    await delay(900);
+
+    await applyJesterState("run");
+    if (!state.root) { endBehavior(); return; }
+    const retX = rand(20, vw() - jW - 20);
+    const retY = vh() - jH - 20;
+    setFacing(retX > state.x);
+    await animateTo(retX, retY, 320);
+
+    await applyJesterState("idle");
+    endBehavior();
+  }
+
   /* ═══════════════════════════════════════════════════════════════════════
      PRANK SYSTEM
   ═══════════════════════════════════════════════════════════════════════ */
@@ -624,6 +675,7 @@
     clapRandomly, clapRandomly,
     idleProclamation, idleProclamation,
     centerDistraction, centerDistraction,
+    royalTantrum, royalTantrum,
   ];
 
   function scheduleNextBehavior() {
@@ -679,10 +731,12 @@
     state.loadToken++;
 
     if (state.root)   state.root.remove();
+    if (state.veil)   state.veil.remove();
     if (state.banner) state.banner.remove();
 
     state.root         = null;
     state.jester       = null;
+    state.veil         = null;
     state.bubble       = null;
     state.banner       = null;
     state.currentState = "idle";

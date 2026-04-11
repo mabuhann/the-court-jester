@@ -1,8 +1,28 @@
 #court-jester-root,
+#court-jester-veil,
 #court-jester-banner,
 #court-jester-bubble {
   pointer-events: none;
   user-select: none;
+}
+
+#court-jester-veil {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  z-index: 2147483646;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 242, 205, 0.18), transparent 28%),
+    repeating-linear-gradient(
+      -12deg,
+      rgba(167, 60, 40, 0.14) 0 16px,
+      rgba(71, 36, 23, 0.08) 16px 32px
+    );
+  transition: opacity 140ms ease;
+}
+
+#court-jester-veil.is-visible {
+  opacity: 1;
 }
 
 #court-jester-root {

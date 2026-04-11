@@ -1,0 +1,1888 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Court Jester — Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #050709;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: #eff3ff;
+    }
+
+    /* ════════════════════════════════════════
+       MAIN STAGE
+    ════════════════════════════════════════ */
+    .stage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 18px 10px;
+    }
+
+    .laptop-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: min(960px, calc(100vw - 36px));
+      max-height: calc(100vh - 28px);
+      filter:
+        drop-shadow(0 40px 80px rgba(0,0,0,0.7))
+        drop-shadow(0 6px 20px rgba(0,0,0,0.5));
+    }
+
+    .laptop-lid {
+      width: 100%;
+      background: linear-gradient(170deg, #3e4148 0%, #2c2f36 100%);
+      border-radius: 16px 16px 0 0;
+      border: 2.5px solid #50545e;
+      border-bottom: none;
+      padding: 10px 10px 0;
+      position: relative;
+    }
+
+    .laptop-lid::before {
+      content: "";
+      position: absolute;
+      top: 6px; left: 50%;
+      transform: translateX(-50%);
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #1c1f26;
+      box-shadow: inset 0 0 0 2px #0d1016;
+    }
+
+    .laptop-screen {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      max-height: calc(100vh - 120px);
+      background: #080a0d;
+      border-radius: 5px 5px 0 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .laptop-base {
+      width: 107%;
+      height: 14px;
+      background: linear-gradient(180deg, #3c3f46 0%, #282b32 60%, #1c1f26 100%);
+      border: 2.5px solid #50545e;
+      border-top: 1px solid #62666e;
+      border-radius: 0 0 5px 5px;
+      position: relative;
+    }
+
+    .laptop-base::after {
+      content: "";
+      position: absolute;
+      top: 4px; left: 50%;
+      transform: translateX(-50%);
+      width: 120px; height: 6px;
+      border-radius: 3px;
+      background: rgba(0,0,0,0.22);
+    }
+
+    .laptop-foot {
+      width: 110%;
+      height: 5px;
+      background: linear-gradient(180deg, #181b22, #0d1016);
+      border-radius: 0 0 8px 8px;
+    }
+
+    /* ════════════════════════════════════════
+       BROWSER
+    ════════════════════════════════════════ */
+    .browser {
+      display: flex;
+      flex-direction: column;
+      width: 100%; height: 100%;
+    }
+
+    .browser-chrome {
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #eaecef 0%, #dde0e4 100%);
+      border-bottom: 1px solid #c6c8cd;
+    }
+
+    .browser-tabs {
+      display: flex;
+      align-items: flex-end;
+      padding: 5px 8px 0;
+      gap: 2px;
+      height: 28px;
+    }
+
+    .browser-tab {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 12px 3px 8px;
+      border-radius: 7px 7px 0 0;
+      font-size: 10.5px;
+      font-weight: 500;
+      height: 24px;
+      max-width: 160px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .browser-tab.active  { background: #f0f2f5; color: #202124; box-shadow: 0 -1px 3px rgba(0,0,0,0.07); z-index: 1; }
+    .browser-tab.inactive{ background: rgba(0,0,0,0.07); color: #5f6368; }
+    .browser-tab.inactive:hover { background: rgba(0,0,0,0.11); }
+
+    .tab-fav { width: 13px; height: 13px; border-radius: 2px; flex-shrink: 0; }
+    .tab-fav.news { background: #1a73e8; }
+    .tab-fav.yt   { background: #ff0000; border-radius: 3px; position: relative; }
+    .tab-fav.yt::after {
+      content: "";
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-28%, -50%);
+      border: 3.5px solid transparent;
+      border-left: 6px solid white;
+      border-right: none;
+    }
+
+    .tab-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; }
+
+    .browser-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 9px 5px;
+      height: 28px;
+    }
+
+    .tls { display: flex; gap: 4px; flex-shrink: 0; }
+    .tl  { width: 11px; height: 11px; border-radius: 50%; }
+    .tl.c { background: #ff5f57; }
+    .tl.m { background: #febc2e; }
+    .tl.x { background: #28c840; }
+
+    .nav { display: flex; gap: 2px; flex-shrink: 0; }
+    .nav-btn { width: 20px; height: 18px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 13px; }
+
+    .addr-bar {
+      flex: 1;
+      height: 20px;
+      background: white;
+      border: 1px solid #dadce0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      padding: 0 9px;
+      gap: 5px;
+      font-size: 10.5px;
+      color: #202124;
+      overflow: hidden;
+    }
+
+    .addr-lock { font-size: 9px; color: #1e8e3e; }
+    .addr-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Text cursor blink when typing */
+    .addr-bar.typing .addr-text::after {
+      content: "|";
+      animation: blink-caret 0.7s step-end infinite;
+    }
+
+    @keyframes blink-caret { 50% { opacity: 0; } }
+
+    /* Extension icon button in toolbar */
+    .ext-area { flex-shrink: 0; display: flex; align-items: center; gap: 4px; }
+
+    #ext-icon-btn {
+      width: 22px; height: 22px;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    #ext-icon-btn:hover { background: rgba(0,0,0,0.09); }
+
+    #ext-icon-btn img {
+      width: 16px; height: 16px;
+      image-rendering: pixelated;
+      border-radius: 3px;
+    }
+
+    /* Active indicator ring on ext icon when jester is enabled */
+    #ext-icon-btn.active::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 4px;
+      box-shadow: inset 0 0 0 1.5px #2e7d32;
+    }
+
+    /* ════════════════════════════════════════
+       BROWSER VIEWPORT
+    ════════════════════════════════════════ */
+    #demo-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: white;
+    }
+
+    /* Page content layers */
+    .page-layer {
+      position: absolute;
+      inset: 0;
+      transition: opacity 0.22s ease;
+    }
+
+    .page-layer.hidden { opacity: 0; pointer-events: none; }
+
+    /* ─── Normal page ─── */
+    .pg-normal {
+      background: #f8f9fa;
+      display: grid;
+      grid-template-columns: 1fr 195px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .pg-main { padding: 12px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+
+    .pg-site-hdr { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0; }
+    .pg-icon { width: 22px; height: 22px; border-radius: 5px; background: linear-gradient(135deg, #1a73e8, #0b5bb5); flex-shrink: 0; }
+    .pg-name { font-size: 12px; font-weight: 700; color: #1a1a1a; }
+    .pg-nav  { display: flex; gap: 12px; margin-left: auto; }
+    .pg-nav span { font-size: 9.5px; color: #5f6368; }
+
+    .art-card { background: white; border: 1px solid #e4e4e4; border-radius: 7px; padding: 8px 10px; display: flex; gap: 8px; }
+    .art-img  { width: 52px; height: 38px; border-radius: 3px; flex-shrink: 0; background: linear-gradient(135deg, #ddeeff, #c8dff5); }
+    .art-img.b { background: linear-gradient(135deg, #fde8e6, #fad0cd); }
+    .art-img.c { background: linear-gradient(135deg, #e8f5e9, #cde8d0); }
+    .art-img.d { background: linear-gradient(135deg, #fff8e1, #ffe0b2); }
+    .art-body  { flex: 1; }
+    .art-title { font-size: 10.5px; font-weight: 600; color: #202124; line-height: 1.3; margin-bottom: 2px; }
+    .art-meta  { font-size: 9px; color: #9aa0a6; }
+
+    .pg-side { background: #f1f3f4; border-left: 1px solid #e0e0e0; padding: 10px; display: flex; flex-direction: column; gap: 7px; overflow: hidden; }
+    .side-card { background: white; border: 1px solid #e4e4e4; border-radius: 6px; padding: 8px; }
+    .side-tag  { font-size: 8px; font-weight: 700; color: #9aa0a6; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 4px; }
+    .side-copy { font-size: 9px; color: #3c4043; line-height: 1.4; }
+
+    /* ─── YouTube page ─── */
+    .pg-youtube {
+      background: #0f0f0f;
+      display: grid;
+      grid-template-columns: 1fr 185px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .yt-main { padding: 9px 9px 0; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+
+    .yt-player {
+      background: #000;
+      aspect-ratio: 16/9;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+      max-height: 55%;
+    }
+
+    .yt-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+    .yt-bg::after {
+      content: "";
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px);
+    }
+
+    .yt-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+
+    .yt-play-ring {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.3s;
+    }
+
+    .yt-play-ring.playing { opacity: 0.25; }
+
+    .yt-play-ring::after {
+      content: "";
+      border: 8px solid transparent;
+      border-left: 14px solid #111;
+      transform: translateX(2px);
+    }
+
+    .yt-pause-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      background: rgba(220,38,38,0.93);
+      color: white;
+      font-size: 8px; font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.25s;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      pointer-events: none;
+    }
+
+    .yt-pause-badge.show { opacity: 1; }
+
+    .yt-prog-wrap { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.15); }
+    .yt-prog-bar  { height: 100%; background: #ff0000; width: 34%; transition: width 0.4s linear; }
+
+    .yt-hud { position: absolute; bottom: 6px; left: 7px; right: 7px; display: flex; align-items: center; gap: 7px; }
+    .yt-hud-ic { color: rgba(255,255,255,0.8); font-size: 10px; }
+    .yt-hud-t  { font-size: 9px; color: rgba(255,255,255,0.8); }
+
+    .yt-info { padding: 0 1px; }
+    .yt-vid-title { font-size: 11px; font-weight: 600; color: #f1f1f1; line-height: 1.3; margin-bottom: 2px; }
+    .yt-channel   { font-size: 9px; color: #aaa; }
+
+    .yt-side { border-left: 1px solid #272727; padding: 8px; display: flex; flex-direction: column; gap: 7px; overflow: hidden; }
+    .yt-side-lbl { font-size: 8px; color: #aaa; text-transform: uppercase; letter-spacing: 0.09em; font-weight: 600; }
+
+    .yt-rec { display: flex; gap: 6px; }
+    .yt-rec-th { width: 64px; height: 40px; border-radius: 3px; flex-shrink: 0; background: linear-gradient(135deg, #1c1c2e, #2d2d44); }
+    .yt-rec-th.b { background: linear-gradient(135deg, #1a2e1a, #2d4a2d); }
+    .yt-rec-th.c { background: linear-gradient(135deg, #2e1a1a, #4a2d2d); }
+    .yt-rec-th.d { background: linear-gradient(135deg, #1e1a2e, #3a2d55); }
+    .yt-rec-info { flex: 1; }
+    .yt-rec-title { font-size: 9px; color: #f1f1f1; line-height: 1.3; font-weight: 500; }
+    .yt-rec-ch    { font-size: 8px; color: #aaa; margin-top: 1px; }
+
+    /* ════════════════════════════════════════
+       JESTER OVERLAYS (mirrors content.css)
+    ════════════════════════════════════════ */
+    #demo-jester-root {
+      position: absolute;
+      left: 0; top: 0;
+      z-index: 100;
+      transform: translate3d(0px, 0px, 0px);
+      will-change: transform;
+      pointer-events: none;
+      display: none;
+    }
+
+    #demo-jester {
+      position: absolute;
+      left: 0; top: 0;
+      image-rendering: pixelated;
+      background-repeat: no-repeat;
+      background-position: 0px 0px;
+      will-change: background-image, width, height, transform;
+    }
+
+    #demo-bubble {
+      position: absolute;
+      left: 50%; bottom: 100%;
+      transform: translate(-50%, -10px);
+      opacity: 0;
+      padding: 6px 9px;
+      border: 2px solid #3a2218;
+      border-radius: 12px;
+      background: #fff4d8;
+      color: #2b160f;
+      font: 700 10.5px/1.2 system-ui, sans-serif;
+      white-space: nowrap;
+      box-shadow: 0 5px 16px rgba(0,0,0,0.32);
+      transition: opacity 140ms ease, transform 140ms ease;
+      pointer-events: none;
+      z-index: 101;
+    }
+
+    #demo-bubble::after {
+      content: "";
+      position: absolute;
+      left: 50%; bottom: -7px;
+      transform: translateX(-50%);
+      border: 7px solid transparent;
+      border-top: 7px solid #3a2218;
+    }
+
+    #demo-bubble::before {
+      content: "";
+      position: absolute;
+      left: 50%; bottom: -5px;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top: 6px solid #fff4d8;
+      z-index: 1;
+    }
+
+    #demo-bubble.show { opacity: 1; transform: translate(-50%, -16px); }
+
+    #demo-veil {
+      position: absolute; inset: 0;
+      opacity: 0; z-index: 99;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(255,242,205,0.18), transparent 28%),
+        repeating-linear-gradient(-12deg, rgba(167,60,40,0.14) 0 16px, rgba(71,36,23,0.08) 16px 32px);
+      transition: opacity 140ms ease;
+      pointer-events: none;
+    }
+
+    #demo-veil.show { opacity: 1; }
+
+    #demo-banner {
+      position: absolute;
+      left: 50%; top: 9px;
+      transform: translateX(-50%) translateY(-10px);
+      opacity: 0; z-index: 102;
+      padding: 7px 14px;
+      border: 2px solid #4a2816;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #fff4d8 0%, #f3dfb2 100%);
+      color: #4a2816;
+      font: 800 10px/1.2 system-ui, sans-serif;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.32);
+      transition: opacity 200ms ease, transform 200ms ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    #demo-banner.show { opacity: 1; transform: translateX(-50%) translateY(0px); }
+
+    @keyframes vp-shake {
+      0%   { transform: translate3d(0,0,0) rotate(0deg); }
+      20%  { transform: translate3d(5px,-2px,0) rotate(-0.4deg); }
+      40%  { transform: translate3d(-4px,4px,0) rotate(0.4deg); }
+      60%  { transform: translate3d(4px,2px,0) rotate(-0.25deg); }
+      80%  { transform: translate3d(-2px,-1px,0) rotate(0.15deg); }
+      100% { transform: translate3d(0,0,0) rotate(0deg); }
+    }
+
+    #demo-viewport.shaking { animation: vp-shake 0.52s ease-out; }
+
+    /* ════════════════════════════════════════
+       EXTENSION POPUP OVERLAY
+    ════════════════════════════════════════ */
+    #ext-popup {
+      position: fixed;
+      z-index: 9000;
+      width: 200px;
+      background: linear-gradient(180deg, #fff9f0 0%, #fff4e0 100%);
+      border: 1.5px solid #e8d5a8;
+      border-radius: 13px;
+      padding: 14px 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.2);
+      transform-origin: top right;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    #ext-popup.hidden { opacity: 0; pointer-events: none; transform: scale(0.92) translateY(-6px); }
+    #ext-popup.show   { opacity: 1; pointer-events: all;  transform: scale(1)    translateY(0); }
+
+    .ep-hdr { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+    .ep-logo { width: 32px; height: 32px; image-rendering: pixelated; border-radius: 8px; }
+    .ep-title { font-size: 12px; font-weight: 800; color: #2b160f; }
+    .ep-sub   { font-size: 9px; color: #9a7055; }
+
+    .ep-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+
+    .ep-status { font-size: 12px; font-weight: 700; color: #3a2218; transition: color 0.2s; }
+    .ep-status.on { color: #1a7a3a; }
+
+    .ep-toggle {
+      position: relative;
+      width: 40px; height: 22px;
+      background: #ccc;
+      border-radius: 11px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    .ep-toggle.on { background: #2e7d32; }
+
+    .ep-thumb {
+      position: absolute;
+      width: 18px; height: 18px;
+      background: white;
+      border-radius: 50%;
+      top: 2px; left: 2px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .ep-toggle.on .ep-thumb { transform: translateX(18px); }
+
+    .ep-worse {
+      width: 100%;
+      padding: 8px;
+      border: none; border-radius: 7px;
+      color: white; font-size: 11px; font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(180deg, #c0392b 0%, #a93226 100%);
+      transition: opacity 0.15s;
+    }
+
+    .ep-worse:disabled { opacity: 0.4; cursor: not-allowed; }
+    .ep-worse.on { background: linear-gradient(180deg, #7b2fbe 0%, #631f9c 100%); }
+
+    /* ════════════════════════════════════════
+       FAKE CURSOR
+    ════════════════════════════════════════ */
+    #fake-cursor {
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 99999;
+      transform: translate(-200px, -200px);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+
+    #cursor-click {
+      position: fixed;
+      top: 0; left: 0;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      pointer-events: none;
+      z-index: 99998;
+      transform: translate(-50%, -50%) scale(0);
+    }
+
+    #cursor-click.pop {
+      animation: cursor-pop 0.38s ease-out forwards;
+    }
+
+    @keyframes cursor-pop {
+      0%   { transform: translate(-50%, -50%) scale(0);   opacity: 0.8; }
+      60%  { transform: translate(-50%, -50%) scale(2.2); opacity: 0.4; }
+      100% { transform: translate(-50%, -50%) scale(3);   opacity: 0; }
+    }
+
+    /* ════════════════════════════════════════
+       INTRO CARD
+    ════════════════════════════════════════ */
+    #intro-card {
+      position: fixed;
+      inset: 0;
+      background: #050709;
+      z-index: 8000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0;
+      transition: opacity 0.7s ease;
+    }
+
+    #intro-card.fade-out { opacity: 0; pointer-events: none; }
+
+    .ic-logo {
+      width: 96px; height: 96px;
+      image-rendering: pixelated;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.05);
+      padding: 6px;
+      animation: ic-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+    }
+
+    @keyframes ic-pop {
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .ic-title {
+      font-size: 38px; font-weight: 900;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffda80 0%, #ffb347 55%, #e8960c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: ic-rise 0.5s ease-out 0.7s both;
+      margin-top: 20px;
+    }
+
+    .ic-sub {
+      font-size: 16px;
+      color: #7a8aa8;
+      animation: ic-rise 0.5s ease-out 0.9s both;
+      margin-top: 6px;
+    }
+
+    @keyframes ic-rise {
+      from { transform: translateY(10px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* ════════════════════════════════════════
+       END CARD
+    ════════════════════════════════════════ */
+    #end-card {
+      position: fixed;
+      inset: 0;
+      background: rgba(5,7,9,0.96);
+      z-index: 8000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+
+    #end-card.show { opacity: 1; pointer-events: all; }
+
+    .ec-logo {
+      width: 80px; height: 80px;
+      image-rendering: pixelated;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      padding: 5px;
+      margin-bottom: 18px;
+    }
+
+    .ec-title {
+      font-size: 34px; font-weight: 900;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffda80 0%, #ffb347 55%, #e8960c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .ec-sub { font-size: 15px; color: #7a8aa8; margin-bottom: 28px; }
+
+    .ec-badge {
+      background: rgba(255,179,71,0.12);
+      border: 1px solid rgba(255,179,71,0.3);
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffb347;
+      margin-bottom: 20px;
+    }
+
+    .ec-replay {
+      border: 1.5px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: #eff3ff;
+      font-size: 13px; font-weight: 600;
+      padding: 9px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .ec-replay:hover { background: rgba(255,255,255,0.1); }
+
+    /* ════════════════════════════════════════
+       SKIP BUTTON
+    ════════════════════════════════════════ */
+    #skip-btn {
+      position: fixed;
+      bottom: 18px; right: 20px;
+      z-index: 9500;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.55);
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    #skip-btn:hover { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.85); }
+    #skip-btn.hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- ══ Intro card ══ -->
+  <div id="intro-card">
+    <img class="ic-logo" src="assets/jester_logo.png" alt="The Court Jester" />
+    <div class="ic-title">The Court Jester</div>
+    <div class="ic-sub">Mischief as a Service</div>
+  </div>
+
+  <!-- ══ Main laptop stage ══ -->
+  <div class="stage">
+    <div class="laptop-wrap">
+
+      <div class="laptop-lid">
+        <div class="laptop-screen">
+          <div class="browser">
+
+            <!-- Browser chrome -->
+            <div class="browser-chrome">
+              <div class="browser-tabs">
+                <div class="browser-tab active" id="tab-normal">
+                  <div class="tab-fav news"></div>
+                  <span class="tab-title">Today's Top Stories</span>
+                </div>
+                <div class="browser-tab inactive" id="tab-yt">
+                  <div class="tab-fav yt"></div>
+                  <span class="tab-title">YouTube</span>
+                </div>
+              </div>
+              <div class="browser-toolbar">
+                <div class="tls">
+                  <div class="tl c"></div>
+                  <div class="tl m"></div>
+                  <div class="tl x"></div>
+                </div>
+                <div class="nav">
+                  <div class="nav-btn">‹</div>
+                  <div class="nav-btn">›</div>
+                </div>
+                <div class="addr-bar" id="addr-bar">
+                  <span class="addr-lock">🔒</span>
+                  <span class="addr-text" id="addr-text">www.topnews.example.com</span>
+                </div>
+                <div class="ext-area">
+                  <div id="ext-icon-btn" title="The Court Jester">
+                    <img src="assets/jester_logo.png" alt="" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Browser viewport: page content + jester overlays -->
+            <div id="demo-viewport">
+
+              <!-- Normal webpage -->
+              <div class="page-layer pg-normal" id="page-normal">
+                <div class="pg-main">
+                  <div class="pg-site-hdr">
+                    <div class="pg-icon"></div>
+                    <span class="pg-name">TopNews</span>
+                    <div class="pg-nav">
+                      <span>World</span><span>Tech</span><span>Culture</span><span>Opinion</span>
+                    </div>
+                  </div>
+                  <div class="art-card">
+                    <div class="art-img"></div>
+                    <div class="art-body">
+                      <div class="art-title">Scientists Confirm: Productivity Is Mostly An Illusion</div>
+                      <div class="art-meta">TopNews · 3 min ago</div>
+                    </div>
+                  </div>
+                  <div class="art-card">
+                    <div class="art-img b"></div>
+                    <div class="art-body">
+                      <div class="art-title">Area Man Finishes Task Without Getting Distracted</div>
+                      <div class="art-meta">TopNews · 12 min ago</div>
+                    </div>
+                  </div>
+                  <div class="art-card">
+                    <div class="art-img c"></div>
+                    <div class="art-body">
+                      <div class="art-title">New Study: Deadlines Are "Merely Suggestions," Says Nobody</div>
+                      <div class="art-meta">TopNews · 28 min ago</div>
+                    </div>
+                  </div>
+                  <div class="art-card">
+                    <div class="art-img d"></div>
+                    <div class="art-body">
+                      <div class="art-title">Focus Declared Officially Overrated By International Committee</div>
+                      <div class="art-meta">TopNews · 41 min ago</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="pg-side">
+                  <div class="side-card">
+                    <div class="side-tag">Trending</div>
+                    <div class="side-copy">The Jester Hath Struck Again · 142K reading</div>
+                  </div>
+                  <div class="side-card">
+                    <div class="side-tag">Sponsored</div>
+                    <div class="side-copy" style="font-style:italic;color:#aaa;">Thou seemest focused.<br>Suspicious.</div>
+                  </div>
+                  <div class="side-card">
+                    <div class="side-tag">Weather</div>
+                    <div class="side-copy">Partly chaotic, 68°F.<br>Jesters likely.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- YouTube page -->
+              <div class="page-layer pg-youtube hidden" id="page-yt">
+                <div class="yt-main">
+                  <div class="yt-player" id="yt-player">
+                    <div class="yt-bg"></div>
+                    <div class="yt-center">
+                      <div class="yt-play-ring playing" id="yt-play-ring"></div>
+                    </div>
+                    <div class="yt-pause-badge" id="yt-pause-badge">Paused by Royal Decree</div>
+                    <div class="yt-prog-wrap">
+                      <div class="yt-prog-bar" id="yt-prog"></div>
+                    </div>
+                    <div class="yt-hud">
+                      <span class="yt-hud-ic">▶</span>
+                      <span class="yt-hud-ic">🔊</span>
+                      <span class="yt-hud-t">4:22 / 18:47</span>
+                    </div>
+                  </div>
+                  <div class="yt-info">
+                    <div class="yt-vid-title">Medieval Jesters: A Surprisingly Relatable History</div>
+                    <div class="yt-channel">HistoryBytes · 482K views · 3 days ago</div>
+                  </div>
+                </div>
+                <div class="yt-side">
+                  <div class="yt-side-lbl">Up Next</div>
+                  <div class="yt-rec"><div class="yt-rec-th"></div><div class="yt-rec-info"><div class="yt-rec-title">Why Can't I Focus For More Than 4 Minutes</div><div class="yt-rec-ch">BrainSci</div></div></div>
+                  <div class="yt-rec"><div class="yt-rec-th b"></div><div class="yt-rec-info"><div class="yt-rec-title">The Art of the Perfectly Timed Distraction</div><div class="yt-rec-ch">JesterTech</div></div></div>
+                  <div class="yt-rec"><div class="yt-rec-th c"></div><div class="yt-rec-info"><div class="yt-rec-title">Chaos Theory Explained With Hats</div><div class="yt-rec-ch">PhysicsFun</div></div></div>
+                  <div class="yt-rec"><div class="yt-rec-th d"></div><div class="yt-rec-info"><div class="yt-rec-title">Medieval Pranks That Actually Worked</div><div class="yt-rec-ch">HistoryBytes</div></div></div>
+                </div>
+              </div>
+
+              <!--
+                Jester overlay — mirrors content.js ensureDom() DOM structure:
+                  #court-jester-root   → #demo-jester-root
+                  #court-jester        → #demo-jester
+                  #court-jester-bubble → #demo-bubble
+                  #court-jester-veil   → #demo-veil
+                  #court-jester-banner → #demo-banner
+              -->
+              <div id="demo-jester-root">
+                <div id="demo-jester" data-state="idle"></div>
+                <div id="demo-bubble"></div>
+              </div>
+              <div id="demo-veil"></div>
+              <div id="demo-banner"></div>
+
+            </div><!-- /demo-viewport -->
+          </div><!-- /browser -->
+        </div><!-- /laptop-screen -->
+      </div><!-- /laptop-lid -->
+      <div class="laptop-base"></div>
+      <div class="laptop-foot"></div>
+
+    </div><!-- /laptop-wrap -->
+  </div><!-- /stage -->
+
+  <!-- Extension popup (positioned via JS near ext-icon-btn) -->
+  <div id="ext-popup" class="hidden">
+    <div class="ep-hdr">
+      <img class="ep-logo" src="assets/jester_logo.png" alt="Jester" />
+      <div>
+        <div class="ep-title">The Court Jester</div>
+        <div class="ep-sub">Mischief as a Service</div>
+      </div>
+    </div>
+    <div class="ep-row">
+      <span class="ep-status" id="ep-status">Dormant</span>
+      <div class="ep-toggle" id="ep-toggle"><div class="ep-thumb"></div></div>
+    </div>
+    <button class="ep-worse" id="ep-worse" disabled>Make it Worse</button>
+  </div>
+
+  <!-- Fake mouse cursor -->
+  <div id="fake-cursor">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="26" viewBox="0 0 11 13">
+      <!-- Tip is at (0,0); standard arrow shape -->
+      <path d="M0 0v11l3-3 2 5 2-1-2-5h4L0 0z"
+            fill="white" stroke="#1a1a1a" stroke-width="0.9" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div id="cursor-click"></div>
+
+  <!-- End card -->
+  <div id="end-card">
+    <img class="ec-logo" src="assets/jester_logo.png" alt="The Court Jester" />
+    <div class="ec-title">The Court Jester</div>
+    <div class="ec-sub">Mischief as a Service</div>
+    <div class="ec-badge">Available as a Chrome Extension</div>
+    <button class="ec-replay" id="replay-btn">↺ Watch Again</button>
+  </div>
+
+  <!-- Skip button -->
+  <button id="skip-btn">Skip →</button>
+
+  <script>
+  /* ═══════════════════════════════════════════════════════════════════════
+     THE COURT JESTER — SCRIPTED AD DEMO
+     Mirrors content.js sprite engine and behavior system within a
+     browser viewport mockup. Runs a predetermined ad sequence.
+
+     Content.js references preserved:
+       • SPRITES config           → content.js:16-21
+       • analyzeFrameBounds       → content.js:161-201
+       • analyzeSprite            → content.js:203-224
+       • buildFrameDataUrls       → content.js:226-248
+       • preloadSprite            → content.js:250-280
+       • applyJesterState         → content.js:290-323
+       • runAcrossScreen          → content.js:449-470
+       • danceInCorner            → content.js:473-504
+       • clapRandomly             → content.js:507-535
+       • centerDistraction        → content.js:549-582
+       • royalTantrum             → content.js:584-616
+       • tryPauseVideo            → content.js:621-639
+  ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ── Sprite config — mirrors content.js SPRITES (lines 16-21) ── */
+  // Demo-only tweak: keep the jester smaller on screen than the extension default.
+  const DEMO_SCALE = 0.40;
+  const SPRITES = {
+    idle:  { src: "assets/jester_idle_normalized.png",     frames: 3, fps: 5,  scale: 0.88 * DEMO_SCALE },
+    run:   { src: "assets/jester_running_normalized.png",  frames: 3, fps: 10, scale: 1.0  * DEMO_SCALE },
+    clap:  { src: "assets/jester_clapping_normalized.png", frames: 3, fps: 8,  scale: 1.0  * DEMO_SCALE },
+    dance: { src: "assets/jester_dancing_normalized.png",  frames: 4, fps: 8,  scale: 1.0  * DEMO_SCALE },
+  };
+
+  const PROCLAMATIONS = [
+    "My liege\u2026",
+    "The realm demands distraction.",
+    "Efficiency hath been outlawed.",
+    "Thou seemest focused\u2026 suspicious.",
+    "Shall we abandon this task?",
+    "Productivity is a most dreadful curse.",
+    "Why work when thou canst watch me?",
+    "The court demands entertainment!",
+    "Art thou\u2026 working? For shame.",
+    "The jester sees all. The jester judges.",
+    "Focus is the enemy of fun.",
+    "The deadline is merely a suggestion.",
+  ];
+
+  /* ── DOM refs ── */
+  const vpEl          = document.getElementById("demo-viewport");
+  const rootEl        = document.getElementById("demo-jester-root");
+  const jesterEl      = document.getElementById("demo-jester");
+  const bubbleEl      = document.getElementById("demo-bubble");
+  const veilEl        = document.getElementById("demo-veil");
+  const bannerEl      = document.getElementById("demo-banner");
+  const cursorEl      = document.getElementById("fake-cursor");
+  const clickEl       = document.getElementById("cursor-click");
+  const introEl       = document.getElementById("intro-card");
+  const endCardEl     = document.getElementById("end-card");
+  const skipBtn       = document.getElementById("skip-btn");
+  const extPopupEl    = document.getElementById("ext-popup");
+  const epStatus      = document.getElementById("ep-status");
+  const epToggle      = document.getElementById("ep-toggle");
+  const epWorse       = document.getElementById("ep-worse");
+  const extIconBtn    = document.getElementById("ext-icon-btn");
+  const addrBar       = document.getElementById("addr-bar");
+  const addrText      = document.getElementById("addr-text");
+  const ytPauseBadge  = document.getElementById("yt-pause-badge");
+  const ytPlayRing    = document.getElementById("yt-play-ring");
+  const ytProg        = document.getElementById("yt-prog");
+
+  /* ── Sequence cancellation token ── */
+  let seqToken = 0;
+  function newToken() { return ++seqToken; }
+  function live(t)    { return t === seqToken; }
+
+  /* ── State object (mirrors content.js state, lines 51-83) ── */
+  const S = {
+    currentState:  "idle",
+    frameIndex:    0,
+    animTimer:     null,
+    loadToken:     0,
+    imageCache:    new Map(),
+    x: 0, y: 0,
+    facingRight:   true,
+    jesterWidth:   80,
+    jesterHeight:  100,
+    animFrame:     null,
+    animResolve:   null,
+    isPerforming:  false,
+    enabled:       false,
+    worseMode:     false,
+    ytPlaying:     false,
+    ytProgVal:     34,
+    ytProgTimer:   null,
+    currentTab:    "normal",
+  };
+
+  /* ── Utilities ── */
+  function rand(a, b)    { return Math.random() * (b - a) + a; }
+  function pick(arr)     { return arr[Math.floor(Math.random() * arr.length)]; }
+  function vw()          { return vpEl.clientWidth;  }
+  function vh()          { return vpEl.clientHeight; }
+  function delay(ms)     { return new Promise(r => setTimeout(r, ms)); }
+
+  /* ════════════════════════════════════════════════════════
+     CURSOR SYSTEM
+  ════════════════════════════════════════════════════════ */
+  const cur = { x: -200, y: -200 };
+
+  function easeInOut(t) {
+    return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+  }
+
+  function moveCursor(tx, ty, ms) {
+    return new Promise(resolve => {
+      const sx = cur.x, sy = cur.y;
+      const t0 = performance.now();
+      function step(now) {
+        const p = Math.min((now - t0) / ms, 1);
+        const e = easeInOut(p);
+        cur.x = sx + (tx - sx) * e;
+        cur.y = sy + (ty - sy) * e;
+        cursorEl.style.transform = `translate(${cur.x}px, ${cur.y}px)`;
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  function elCenter(el, dx = 0, dy = 0) {
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2 + dx, y: r.top + r.height / 2 + dy };
+  }
+
+  function elPos(el, fx = 0.5, fy = 0.5) {
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width * fx, y: r.top + r.height * fy };
+  }
+
+  async function cursorTo(el, dx = 0, dy = 0, ms) {
+    const p = elCenter(el, dx, dy);
+    const dist = Math.hypot(p.x - cur.x, p.y - cur.y);
+    await moveCursor(p.x, p.y, ms ?? Math.max(350, Math.min(1100, dist * 1.1)));
+  }
+
+  async function cursorToPos(x, y, ms) {
+    const dist = Math.hypot(x - cur.x, y - cur.y);
+    await moveCursor(x, y, ms ?? Math.max(300, Math.min(900, dist * 1.1)));
+  }
+
+  function fireClick() {
+    clickEl.style.left = cur.x + "px";
+    clickEl.style.top  = cur.y + "px";
+    clickEl.classList.remove("pop");
+    void clickEl.offsetWidth;
+    clickEl.classList.add("pop");
+  }
+
+  async function click(el, dx = 0, dy = 0) {
+    await cursorTo(el, dx, dy);
+    await delay(180); // hover dwell
+    fireClick();
+    await delay(100);
+  }
+
+  /* ════════════════════════════════════════════════════════
+     TAB SWITCHING
+  ════════════════════════════════════════════════════════ */
+  function switchTab(tab) {
+    S.currentTab = tab;
+    document.getElementById("tab-normal").className = "browser-tab " + (tab === "normal" ? "active" : "inactive");
+    document.getElementById("tab-yt").className     = "browser-tab " + (tab === "yt"     ? "active" : "inactive");
+    document.getElementById("page-normal").classList.toggle("hidden", tab !== "normal");
+    document.getElementById("page-yt").classList.toggle("hidden",     tab !== "yt");
+    addrText.textContent = tab === "yt"
+      ? "www.youtube.com/watch?v=dQw4w9WgXcQ"
+      : "www.topnews.example.com";
+  }
+
+  /* ════════════════════════════════════════════════════════
+     YOUTUBE SIMULATION
+     mirrors content.js tryPauseVideo (lines 621-639)
+  ════════════════════════════════════════════════════════ */
+  function startYtProgress() {
+    stopYtProgress();
+    S.ytPlaying = true;
+    ytPlayRing.classList.add("playing");
+    S.ytProgTimer = setInterval(() => {
+      if (!S.ytPlaying) return;
+      S.ytProgVal = (S.ytProgVal + 0.35) % 100 || 4;
+      ytProg.style.width = S.ytProgVal + "%";
+    }, 350);
+  }
+
+  function stopYtProgress() {
+    clearInterval(S.ytProgTimer);
+    S.ytProgTimer = null;
+  }
+
+  function pauseYtVideo() {
+    S.ytPlaying = false;
+    stopYtProgress();
+    ytPauseBadge.classList.add("show");
+    ytPlayRing.classList.remove("playing");
+  }
+
+  function resumeYtVideo() {
+    ytPauseBadge.classList.remove("show");
+    startYtProgress();
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SHAKE  (mirrors content.js shakePage, lines 96-108)
+  ════════════════════════════════════════════════════════ */
+  function shakeViewport() {
+    vpEl.classList.remove("shaking");
+    void vpEl.offsetWidth;
+    vpEl.classList.add("shaking");
+    setTimeout(() => vpEl.classList.remove("shaking"), 560);
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SPRITE ENGINE
+     Exact port of content.js analyzeSprite /
+     buildFrameDataUrls / preloadSprite / applyJesterState
+  ════════════════════════════════════════════════════════ */
+  function clearAnimTimer() {
+    if (S.animTimer) { clearInterval(S.animTimer); S.animTimer = null; }
+  }
+
+  /* analyzeFrameBounds — mirrors content.js lines 161-201 */
+  function analyzeFrameBounds(img, frameWidth, frameHeight, fi) {
+    const c = document.createElement("canvas");
+    c.width  = Math.ceil(frameWidth);
+    c.height = frameHeight;
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, fi * frameWidth, 0, frameWidth, frameHeight, 0, 0, c.width, c.height);
+    let data, w, h;
+    try {
+      const id = ctx.getImageData(0, 0, c.width, c.height);
+      data = id.data; w = id.width; h = id.height;
+    } catch (_) {
+      return { anchorX: frameWidth/2, anchorY: frameHeight, minX:0, minY:0, maxX:Math.ceil(frameWidth)-1, maxY:frameHeight-1 };
+    }
+    let minX = w, minY = h, maxX = -1, maxY = -1;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      if (data[(y*w+x)*4+3] < 8) continue;
+      if (x < minX) minX = x; if (y < minY) minY = y;
+      if (x > maxX) maxX = x; if (y > maxY) maxY = y;
+    }
+    if (maxX < 0) return { anchorX: frameWidth/2, anchorY: frameHeight, minX:0, minY:0, maxX:w-1, maxY:h-1 };
+    const lbY = Math.min(h-1, Math.max(minY, Math.floor(h*0.55)));
+    let wx = 0, wc = 0;
+    for (let y = lbY; y <= maxY; y++) {
+      const rw = y - lbY + 1;
+      for (let x = minX; x <= maxX; x++) {
+        if (data[(y*w+x)*4+3] < 8) continue;
+        wx += x*rw; wc += rw;
+      }
+    }
+    return { anchorX: wc>0 ? wx/wc : (minX+maxX)/2, anchorY: maxY, minX, minY, maxX, maxY };
+  }
+
+  /* analyzeSprite — mirrors content.js lines 203-224 */
+  function analyzeSprite(img, frames, frameWidth, frameHeight) {
+    const fm = Array.from({ length: frames }, (_, i) => analyzeFrameBounds(img, frameWidth, frameHeight, i));
+    const vw2 = fm.map(m => m.maxX - m.minX + 1);
+    const vh2 = fm.map(m => m.maxY - m.minY + 1);
+    const sB = Math.max(...fm.map(m => m.maxY));
+    const sW = Math.max(1, ...vw2);
+    const sH = Math.max(1, sB - Math.min(...fm.map(m => m.minY)) + 1);
+    return {
+      frameMetrics: fm,
+      frameOffsets: fm.map((m, i) => ({ x: Math.round((sW-vw2[i])/2 - m.minX), y: Math.round(sB-m.maxY) })),
+      stageWidth: sW, stageHeight: sH,
+      visibleHeight: Math.max(1, ...vh2),
+    };
+  }
+
+  /* buildFrameDataUrls — mirrors content.js lines 226-248 */
+  function buildFrameDataUrls(img, metrics, frameWidth, scale) {
+    const sw = Math.max(1, Math.round(metrics.stageWidth  * scale));
+    const sh = Math.max(1, Math.round(metrics.stageHeight * scale));
+    return metrics.frameMetrics.map((m, i) => {
+      const vw2 = m.maxX - m.minX + 1, vh2 = m.maxY - m.minY + 1;
+      const c = document.createElement("canvas");
+      c.width = sw; c.height = sh;
+      const ctx = c.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, i*frameWidth+m.minX, m.minY, vw2, vh2,
+        Math.round((sw-vw2*scale)/2), Math.round(sh-vh2*scale), vw2*scale, vh2*scale);
+      return c.toDataURL();
+    });
+  }
+
+  /* preloadSprite — mirrors content.js lines 250-280 (uses relative paths, no chrome.runtime) */
+  function preloadSprite(name) {
+    if (S.imageCache.has(name)) return S.imageCache.get(name);
+    const def = SPRITES[name];
+    if (!def) return Promise.reject(new Error("Unknown state: " + name));
+    const p = new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const fw = img.naturalWidth / def.frames;
+          const m  = analyzeSprite(img, def.frames, fw, img.naturalHeight);
+          const sc = def.scale || 1;
+
+          let frameUrls = null;
+          try {
+            // This can fail under some file:// / canvas security contexts; fallback below keeps the demo moving.
+            frameUrls = buildFrameDataUrls(img, m, fw, sc);
+          } catch (e) {
+            frameUrls = null;
+          }
+
+          if (frameUrls) {
+            res({
+              img, frames: def.frames, fps: def.fps, scale: sc, frameWidth: fw,
+              frameUrls,
+              stageWidth:    Math.round(m.stageWidth  * sc),
+              stageHeight:   Math.round(m.stageHeight * sc),
+              visibleHeight: Math.round(m.visibleHeight * sc),
+            });
+            return;
+          }
+
+          // Fallback: render directly from the sprite sheet using background-position stepping.
+          const framePixelWidth  = Math.max(1, Math.round(fw * sc));
+          const framePixelHeight = Math.max(1, Math.round(img.naturalHeight * sc));
+          res({
+            img,
+            frames: def.frames,
+            fps: def.fps,
+            scale: sc,
+            frameWidth: fw,
+            sheetSrc: def.src,
+            framePixelWidth,
+            framePixelHeight,
+            stageWidth: framePixelWidth,
+            stageHeight: framePixelHeight,
+            visibleHeight: framePixelHeight,
+          });
+        } catch (e) {
+          rej(e);
+        }
+      };
+      img.onerror = () => rej(new Error("Failed: " + def.src));
+      img.src = def.src;
+    });
+    S.imageCache.set(name, p);
+    return p;
+  }
+
+  function renderFrame(sprite, fi) {
+    S.frameIndex = fi;
+    if (sprite.sheetSrc) {
+      jesterEl.style.backgroundImage = `url("${sprite.sheetSrc}")`;
+      jesterEl.style.backgroundSize  = `${sprite.framePixelWidth * sprite.frames}px ${sprite.framePixelHeight}px`;
+      jesterEl.style.backgroundPosition = `${-fi * sprite.framePixelWidth}px 0px`;
+      return;
+    }
+
+    const url = sprite.frameUrls?.[fi] || sprite.frameUrls?.[0] || "";
+    jesterEl.style.backgroundImage    = url ? `url("${url}")` : "";
+    jesterEl.style.backgroundSize     = `${sprite.stageWidth}px ${sprite.stageHeight}px`;
+    jesterEl.style.backgroundPosition = "0px 0px";
+  }
+
+  /* applyJesterState — mirrors content.js lines 290-323 */
+  async function applyJesterState(nextState) {
+    const tok = ++S.loadToken;
+    clearAnimTimer();
+    S.currentState = nextState;
+    jesterEl.dataset.state = nextState;
+    let sprite;
+    try { sprite = await preloadSprite(nextState); }
+    catch (e) { console.warn("[demo] sprite load failed:", e); return; }
+    if (tok !== S.loadToken) return;
+    jesterEl.style.width          = `${sprite.stageWidth}px`;
+    jesterEl.style.height         = `${sprite.stageHeight}px`;
+    rootEl.style.width            = `${sprite.stageWidth}px`;
+    rootEl.style.height           = `${sprite.stageHeight}px`;
+    S.jesterWidth  = sprite.stageWidth;
+    S.jesterHeight = sprite.stageHeight;
+    renderFrame(sprite, 0);
+    const frameMs = Math.max(24, Math.round(1000 / sprite.fps));
+    S.animTimer = setInterval(() => {
+      S.frameIndex = (S.frameIndex + 1) % sprite.frames;
+      renderFrame(sprite, S.frameIndex);
+    }, frameMs);
+  }
+
+  /* ════════════════════════════════════════════════════════
+     POSITIONING  (mirrors content.js lines 331-385)
+  ════════════════════════════════════════════════════════ */
+  function applyPos(x, y) {
+    S.x = Math.round(x); S.y = Math.round(y);
+    rootEl.style.transform = `translate3d(${S.x}px, ${S.y}px, 0)`;
+  }
+
+  function setFacing(right) {
+    S.facingRight = right;
+    jesterEl.style.transform = right ? "scaleX(1)" : "scaleX(-1)";
+  }
+
+  function cancelMove() {
+    if (S.animFrame)   { cancelAnimationFrame(S.animFrame); S.animFrame = null; }
+    if (S.animResolve) { S.animResolve(); S.animResolve = null; }
+  }
+
+  /* animateTo — mirrors content.js lines 363-385 */
+  function animateTo(tx, ty, ms) {
+    return new Promise(resolve => {
+      cancelMove();
+      const sx = S.x, sy = S.y, t0 = performance.now();
+      S.animResolve = resolve;
+      function step(now) {
+        const t = Math.min((now - t0) / ms, 1);
+        applyPos(sx + (tx - sx) * t, sy + (ty - sy) * t);
+        if (t < 1) { S.animFrame = requestAnimationFrame(step); }
+        else { S.animFrame = null; S.animResolve = null; resolve(); }
+      }
+      S.animFrame = requestAnimationFrame(step);
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════
+     MESSAGES  (mirrors content.js lines 390-426)
+  ════════════════════════════════════════════════════════ */
+  function showBubble(text, ms = 3000) {
+    bubbleEl.textContent = text;
+    bubbleEl.classList.add("show");
+    clearTimeout(bubbleEl._t);
+    bubbleEl._t = setTimeout(() => bubbleEl.classList.remove("show"), ms);
+  }
+
+  function showBanner(text, ms = 2800) {
+    bannerEl.textContent = text;
+    bannerEl.classList.add("show");
+    clearTimeout(bannerEl._t);
+    bannerEl._t = setTimeout(() => bannerEl.classList.remove("show"), ms);
+  }
+
+  function showVeil(ms = 520) {
+    veilEl.classList.add("show");
+    clearTimeout(veilEl._t);
+    veilEl._t = setTimeout(() => veilEl.classList.remove("show"), ms);
+  }
+
+  function chaos(label, ms = 1600) {
+    showBanner(label, ms);
+    showVeil(S.worseMode ? 820 : 520);
+    shakeViewport();
+  }
+
+  /* ════════════════════════════════════════════════════════
+     JESTER BEHAVIOR FUNCTIONS
+     Each mirrors the exact behavior from content.js.
+     Called in scripted sequence instead of randomly.
+  ════════════════════════════════════════════════════════ */
+
+  /* runAcrossScreen — mirrors content.js lines 449-470 */
+  async function runAcrossScreen(goRight) {
+    if (!S.enabled) return;
+    S.isPerforming = true;
+    const jW = S.jesterWidth || 80, jH = S.jesterHeight || 100;
+    const groundY = vh() - jH - 8;
+    const dir = goRight ?? (Math.random() > 0.5);
+    const startX = dir ? -(jW+10) : vw()+10;
+    const endX   = dir ?  vw()+10  : -(jW+10);
+    setFacing(dir);
+    applyPos(startX, groundY);
+    await applyJesterState("run");
+    const speed = S.worseMode ? 380 : 240; // px/s — same as content.js
+    await animateTo(endX, groundY, (Math.abs(endX-startX)/speed)*1000);
+    await applyJesterState("idle");
+    S.isPerforming = false;
+  }
+
+  /* danceInCorner — mirrors content.js lines 473-504 */
+  async function danceInCorner(cornerIdx) {
+    if (!S.enabled) return;
+    S.isPerforming = true;
+    const jW = S.jesterWidth||80, jH = S.jesterHeight||100;
+    const corners = [
+      { x:12,           y:vh()-jH-12 },
+      { x:vw()-jW-12,   y:vh()-jH-12 },
+      { x:12,           y:24 },
+      { x:vw()-jW-12,   y:24 },
+    ];
+    const corner = corners[cornerIdx ?? Math.floor(Math.random()*4)];
+    await applyJesterState("run");
+    setFacing(corner.x > S.x);
+    await animateTo(corner.x, corner.y, 550);
+    await applyJesterState("dance");
+    showBubble(pick(["Behold, my finest steps!", "The court demands a dance!", "Can thou match this grace?", "La la la la la."]));
+    await delay(S.worseMode ? 2000 : 3200);
+    await applyJesterState("idle");
+    S.isPerforming = false;
+  }
+
+  /* clapRandomly — mirrors content.js lines 507-535 */
+  async function clapRandomly() {
+    if (!S.enabled) return;
+    S.isPerforming = true;
+    const jH=S.jesterHeight||100, jW=S.jesterWidth||80;
+    const tx = rand(12, vw()-jW-12);
+    const ty = rand(vh()*0.35, vh()-jH-12);
+    await applyJesterState("run");
+    setFacing(tx > S.x);
+    await animateTo(tx, ty, 450);
+    await applyJesterState("clap");
+    if (S.worseMode) chaos("Applause. Disorder. Splendor.");
+    showBubble(pick(["Bravo! Bravo!", "A magnificent nothing!", "I applaud thine confusion.", "Simply dazzling."]));
+    await delay(S.worseMode ? 1800 : 2600);
+    await applyJesterState("idle");
+    S.isPerforming = false;
+  }
+
+  /* centerDistraction — mirrors content.js lines 549-582 */
+  async function centerDistraction() {
+    if (!S.enabled) return;
+    S.isPerforming = true;
+    const jW=S.jesterWidth||80, jH=S.jesterHeight||100;
+    const cx=(vw()-jW)/2, cy=(vh()-jH)/2;
+    await applyJesterState("run");
+    setFacing(cx > S.x);
+    await animateTo(cx, cy, 350);
+    await applyJesterState("dance");
+    chaos("LOOK AT HIM.");
+    showBubble(pick(["LOOK AT ME.", "Thy focus hath been stolen.", "I have replaced your productivity."]));
+    await delay(S.worseMode ? 2200 : 3000);
+    await applyJesterState("run");
+    const rx = rand(12, vw()-(S.jesterWidth||80)-12);
+    setFacing(rx > S.x);
+    await animateTo(rx, vh()-(S.jesterHeight||100)-12, 380);
+    await applyJesterState("idle");
+    S.isPerforming = false;
+  }
+
+  /* royalTantrum — mirrors content.js lines 584-616 */
+  async function royalTantrum() {
+    if (!S.enabled) return;
+    S.isPerforming = true;
+    const jW=S.jesterWidth||80, jH=S.jesterHeight||100;
+    const cx=Math.max(12,(vw()-jW)/2), cy=Math.max(20,(vh()-jH)/2-10);
+    await applyJesterState("run");
+    setFacing(cx > S.x);
+    await animateTo(cx, cy, 280);
+    await applyJesterState("dance");
+    chaos("A royal tantrum is underway.");
+    showBubble("I reject thy peace and quiet.", 1800);
+    await delay(700);
+    chaos("Order has been postponed.");
+    await delay(800);
+    /* Simulate tryPauseVideo() on YouTube tab */
+    if (S.currentTab === "yt") {
+      pauseYtVideo();
+      chaos("Intermission by royal decree.");
+      showBubble(pick(["Intermission, my liege.", "The performance lacks flair.", "A royal pause hath been declared."]));
+    }
+    await delay(900);
+    await applyJesterState("run");
+    const rx=rand(12,vw()-jW-12), ry=vh()-jH-12;
+    setFacing(rx > S.x);
+    await animateTo(rx, ry, 320);
+    await applyJesterState("idle");
+    S.isPerforming = false;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     JESTER LIFECYCLE (ad mode — no scheduler, no chrome APIs)
+  ════════════════════════════════════════════════════════ */
+  function jesterAppear() {
+    S.enabled = true;
+    rootEl.style.display = "block";
+    applyPos(32, vh() - (S.jesterHeight||100) - 12);
+    applyJesterState("idle");
+    extIconBtn.classList.add("active");
+  }
+
+  function jesterVanish() {
+    S.enabled = false;
+    clearAnimTimer();
+    cancelMove();
+    S.isPerforming = false;
+    S.loadToken++;
+    rootEl.style.display = "none";
+    veilEl.classList.remove("show");
+    bannerEl.classList.remove("show");
+    bubbleEl.classList.remove("show");
+    extIconBtn.classList.remove("active");
+  }
+
+  function resetAll() {
+    jesterVanish();
+    stopYtProgress();
+    switchTab("normal");
+    epToggle.classList.remove("on");
+    epStatus.textContent = "Dormant";
+    epStatus.classList.remove("on");
+    epWorse.disabled = true;
+    epWorse.classList.remove("on");
+    epWorse.textContent = "Make it Worse";
+    extPopupEl.classList.remove("show");
+    extPopupEl.classList.add("hidden");
+    S.worseMode = false;
+    S.ytProgVal = 34;
+    ytProg.style.width = "34%";
+    ytPauseBadge.classList.remove("show");
+    ytPlayRing.classList.add("playing");
+    addrText.textContent = "www.topnews.example.com";
+    addrBar.classList.remove("typing");
+    cur.x = -200; cur.y = -200;
+    cursorEl.style.transform = `translate(-200px, -200px)`;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     EXTENSION POPUP HELPERS
+  ════════════════════════════════════════════════════════ */
+  function positionPopup() {
+    const r = extIconBtn.getBoundingClientRect();
+    extPopupEl.style.right = (window.innerWidth - r.right) + "px";
+    extPopupEl.style.top   = (r.bottom + 7) + "px";
+  }
+
+  function showPopup() {
+    positionPopup();
+    extPopupEl.classList.remove("hidden");
+    extPopupEl.classList.add("show");
+  }
+
+  function hidePopup() {
+    extPopupEl.classList.remove("show");
+    extPopupEl.classList.add("hidden");
+  }
+
+  /* ════════════════════════════════════════════════════════
+     ADDRESS BAR TYPING ANIMATION
+  ════════════════════════════════════════════════════════ */
+  async function typeUrl(url, t) {
+    addrBar.classList.add("typing");
+    addrText.textContent = "";
+    for (const ch of url) {
+      if (!live(t)) break;
+      addrText.textContent += ch;
+      await delay(30 + Math.random() * 55);
+    }
+    addrBar.classList.remove("typing");
+  }
+
+  /* ════════════════════════════════════════════════════════
+     AD SEQUENCE SCENES
+  ════════════════════════════════════════════════════════ */
+
+  /* Scene 1: Logo intro (plays before the browser is visible) */
+  async function sceneIntro(t) {
+    // Intro card already visible; let it sit for 2.8s
+    await delay(2800);
+    if (!live(t)) return;
+    // Fade out intro card
+    introEl.classList.add("fade-out");
+    await delay(700);
+    if (!live(t)) return;
+    introEl.style.display = "none";
+  }
+
+  /* Scene 2: Browser opens — cursor appears and browses */
+  async function sceneBrowse(t) {
+    // Cursor appears near top-center and drifts down toward content
+    const vpRect = vpEl.getBoundingClientRect();
+    cur.x = vpRect.left + vpRect.width * 0.5;
+    cur.y = vpRect.top  + 20;
+    cursorEl.style.transform = `translate(${cur.x}px, ${cur.y}px)`;
+    await delay(300);
+    if (!live(t)) return;
+
+    // Drift to first article
+    const art1 = document.querySelector(".art-card");
+    await cursorTo(art1, 0, 0, 900);
+    if (!live(t)) return;
+    await delay(600);
+
+    // Move to second article
+    const arts = document.querySelectorAll(".art-card");
+    await cursorTo(arts[1], 20, -5, 600);
+    if (!live(t)) return;
+    await delay(500);
+
+    // Cursor drifts to sidebar
+    await cursorTo(document.querySelector(".side-card"), 0, 0, 700);
+    if (!live(t)) return;
+    await delay(400);
+  }
+
+  /* Scene 3: User clicks extension icon, popup appears, toggle ON */
+  async function sceneEnableJester(t) {
+    // Move to extension icon and click
+    await click(extIconBtn);
+    if (!live(t)) return;
+    showPopup();
+    await delay(600);
+    if (!live(t)) return;
+
+    // Move cursor to toggle and click it
+    const toggleEl = document.getElementById("ep-toggle");
+    await cursorTo(toggleEl, 0, 0, 550);
+    if (!live(t)) return;
+    await delay(220);
+    fireClick();
+    await delay(80);
+
+    // Toggle turns on
+    epToggle.classList.add("on");
+    epStatus.textContent = "Unleashed";
+    epStatus.classList.add("on");
+    epWorse.disabled = false;
+    await delay(400);
+    if (!live(t)) return;
+
+    // Move cursor away, close popup
+    await cursorTo(extIconBtn, 0, 40, 400);
+    if (!live(t)) return;
+    await delay(300);
+    hidePopup();
+
+    // Jester appears with banner
+    jesterAppear();
+    showBanner("The Court Jester is loose.");
+    await delay(2600);
+  }
+
+  /* Scene 4: Normal-page chaos — jester runs, proclaims, dances */
+  async function sceneNormalChaos(t) {
+    if (!live(t)) return;
+
+    // Jester runs left to right
+    await runAcrossScreen(true);
+    if (!live(t)) return;
+
+    // Cursor moves to article (user tries to ignore the jester)
+    const arts = document.querySelectorAll(".art-card");
+    await cursorTo(arts[2], 15, 0, 700);
+    if (!live(t)) return;
+    await delay(400);
+
+    // Jester makes proclamation from current idle position
+    S.isPerforming = true;
+    showBubble("Thou seemest focused\u2026 suspicious.");
+    await delay(3000);
+    S.isPerforming = false;
+    if (!live(t)) return;
+
+    // Cursor startled — jumps slightly, then resettles
+    await cursorToPos(cur.x + 18, cur.y - 12, 120);
+    await delay(200);
+    await cursorTo(arts[2], 15, 0, 300);
+    if (!live(t)) return;
+    await delay(500);
+
+    // Jester runs back left
+    await runAcrossScreen(false);
+    if (!live(t)) return;
+    await delay(400);
+
+    // Jester dances in bottom-right corner
+    await danceInCorner(1);
+    if (!live(t)) return;
+    await delay(600);
+  }
+
+  /* Scene 5: Switch to YouTube, video plays */
+  async function sceneOpenYoutube(t) {
+    if (!live(t)) return;
+
+    // Move to YouTube tab and click it
+    await click(document.getElementById("tab-yt"), 0, 0);
+    if (!live(t)) return;
+    switchTab("yt");
+    await delay(300);
+    if (!live(t)) return;
+
+    // Type URL (just show it updating)
+    addrText.textContent = "www.youtube.com/watch?v=dQw4w9WgXcQ";
+    await delay(400);
+    if (!live(t)) return;
+
+    // Video starts playing
+    startYtProgress();
+    await delay(400);
+    if (!live(t)) return;
+
+    // Cursor settles over video player (user is watching)
+    const player = document.getElementById("yt-player");
+    await cursorTo(player, 0, -10, 900);
+    if (!live(t)) return;
+    await delay(1200);
+
+    // Cursor drifts slightly (natural human movement while watching)
+    await cursorToPos(cur.x + 20, cur.y + 8, 700);
+    if (!live(t)) return;
+    await delay(1000);
+  }
+
+  /* Scene 6: The prank — jester pauses the video and dances */
+  async function sceneVideoPrank(t) {
+    if (!live(t)) return;
+
+    // Ensure the YouTube mock is clearly "playing" before the jester pauses it.
+    if (S.currentTab === "yt") {
+      resumeYtVideo();
+      await delay(900);
+      if (!live(t)) return;
+    }
+
+    // Jester runs from its corner toward center of screen
+    S.isPerforming = true;
+    const jW=S.jesterWidth||80, jH=S.jesterHeight||100;
+    const cx=(vw()-jW)/2;
+    const cy=(vh()-jH)/3; // upper-center (in front of video)
+
+    await applyJesterState("run");
+    setFacing(cx > S.x);
+    await animateTo(cx, cy, 600);
+    if (!live(t)) return;
+
+    // Jester dances — and simultaneously pauses the video
+    await applyJesterState("dance");
+    pauseYtVideo();
+    chaos("Intermission by royal decree.");
+    showBubble("The performance lacks flair.", 3500);
+    if (!live(t)) return;
+
+    // Cursor moves toward play button (user tries to resume)
+    const player = document.getElementById("yt-player");
+    await cursorTo(player, 0, 0, 900);
+    if (!live(t)) return;
+    await delay(300);
+    fireClick(); // click that does nothing
+    await delay(400);
+    if (!live(t)) return;
+
+    // Cursor hovers helplessly — jester keeps dancing
+    await cursorToPos(cur.x + 12, cur.y + 6, 400);
+    if (!live(t)) return;
+    await delay(1800);
+    if (!live(t)) return;
+
+    // Jester retreats — run to corner
+    await applyJesterState("run");
+    const rx=rand(12, vw()-jW-12);
+    setFacing(rx > S.x);
+    await animateTo(rx, vh()-jH-12, 420);
+    await applyJesterState("idle");
+    S.isPerforming = false;
+    if (!live(t)) return;
+
+    // Video resumes
+    await delay(600);
+    resumeYtVideo();
+    await delay(800);
+  }
+
+  /* Scene 7: "Make it Worse" — cursor opens popup, clicks the button */
+  async function sceneMakeItWorse(t) {
+    if (!live(t)) return;
+
+    // Click extension icon again to open popup
+    await click(extIconBtn);
+    if (!live(t)) return;
+    showPopup();
+    await delay(600);
+    if (!live(t)) return;
+
+    // Move to "Make it Worse" button
+    await cursorTo(epWorse, 0, 0, 600);
+    if (!live(t)) return;
+    await delay(220);
+    fireClick();
+    await delay(100);
+
+    // Activate worse mode
+    S.worseMode = true;
+    epWorse.classList.add("on");
+    epWorse.textContent = "Restore Order";
+    await delay(200);
+    hidePopup();
+    if (!live(t)) return;
+
+    // Immediate chaos flash
+    showBanner("WORSE MODE ACTIVATED", 2200);
+    showVeil(900);
+    shakeViewport();
+    await delay(500);
+    if (!live(t)) return;
+
+    // Royal tantrum (on YouTube tab — pauses video again)
+    await royalTantrum();
+    if (!live(t)) return;
+    await delay(400);
+    if (!live(t)) return;
+
+    // One more run across
+    await runAcrossScreen(false);
+    if (!live(t)) return;
+    await delay(500);
+
+    // Clap somewhere random
+    await clapRandomly();
+    if (!live(t)) return;
+    await delay(600);
+  }
+
+  /* Scene 8: End card */
+  async function sceneEndCard(t) {
+    if (!live(t)) return;
+    // Jester goes idle one last time
+    showBubble("The show must go on.", 2000);
+    await delay(1500);
+    if (!live(t)) return;
+
+    // Fade jester out, fade end card in
+    jesterVanish();
+    stopYtProgress();
+    skipBtn.classList.add("hidden");
+    endCardEl.classList.add("show");
+  }
+
+  /* ════════════════════════════════════════════════════════
+     MAIN AD RUNNER
+  ════════════════════════════════════════════════════════ */
+  async function runAd() {
+    const t = newToken();
+    resetAll();
+    endCardEl.classList.remove("show");
+    introEl.style.display = "";
+    introEl.classList.remove("fade-out");
+    skipBtn.classList.remove("hidden");
+
+    // Kick off sprite preloading, but don't block the intro on heavy canvas work.
+    Promise.all(Object.keys(SPRITES).map(k => preloadSprite(k).catch(() => {})));
+    if (!live(t)) return;
+
+    await sceneIntro(t);
+    if (!live(t)) return;
+    await sceneBrowse(t);
+    if (!live(t)) return;
+    await sceneEnableJester(t);
+    if (!live(t)) return;
+    await sceneNormalChaos(t);
+    if (!live(t)) return;
+    await sceneOpenYoutube(t);
+    if (!live(t)) return;
+    await sceneVideoPrank(t);
+    if (!live(t)) return;
+    await sceneMakeItWorse(t);
+    if (!live(t)) return;
+    await sceneEndCard(t);
+  }
+
+  /* ── Controls ── */
+  document.getElementById("replay-btn").addEventListener("click", () => runAd());
+
+  skipBtn.addEventListener("click", () => {
+    newToken(); // cancels running sequence
+    resetAll();
+    introEl.style.display = "none";
+    skipBtn.classList.add("hidden");
+    endCardEl.classList.add("show");
+  });
+
+  /* ── Start ── */
+  runAd();
+  </script>
+</body>
+</html>
